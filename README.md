@@ -1,5 +1,9 @@
 # svmai - Solana Wallet Management CLI
 
+[![GitHub](https://img.shields.io/github/license/openSVM/svmai-cli)](https://github.com/openSVM/svmai-cli/blob/master/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/openSVM/svmai-cli)](https://github.com/openSVM/svmai-cli/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/openSVM/svmai-cli)](https://github.com/openSVM/svmai-cli/issues)
+
 `svmai` is a command-line interface (CLI) tool built with Rust for managing Solana wallets. It allows users to find Solana wallet files, securely store their private keys using system keychain encryption, manage multiple wallets, view balances, and perform batch operations and token mixing for enhanced privacy.
 
 ## Features
@@ -34,8 +38,11 @@
 
 ### Building from Source
 
-1.  Clone the repository (or download the source code).
-2.  Navigate to the project directory: `cd svmai`
+1.  Clone the repository (or download the source code):
+    ```bash
+    git clone https://github.com/openSVM/svmai-cli.git
+    ```
+2.  Navigate to the project directory: `cd svmai-cli`
 3.  Build the project: `cargo build --release`
 4.  The executable will be located at `target/release/svmai`.
 
@@ -264,6 +271,16 @@ The application uses a combination of:
     *   Check CPU usage to ensure multiple cores are being utilized
     *   For longer prefixes (more than 3 characters), expect significantly longer search times
     *   Consider increasing the timeout for more complex prefixes
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## Disclaimer
 
