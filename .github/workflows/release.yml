@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+          body: |
+            ## svmai CLI ${{ github.ref }} Release
+            
+            ### Features
+            - Solana wallet management with secure keychain storage
+            - Multi-threaded wallet file search
+            - Vanity wallet generation with "ai" prefix
+            - Text-based user interface with ratatui
+            - Batch operations for token transfers
+            - Token mixing simulation
+            
+            ### Installation
+            Download the appropriate binary for your platform and make it executable.
+            
+            ```bash
+            chmod +x svmai-<platform>
+            ./svmai-<platform>
+            ```
+            
+            See the [README](https://github.com/openSVM/svmai-cli/blob/master/README.md) for more details.
+
+  build-release:
+    needs: create-release
+    name: Build Release - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: svmai
+            asset_name: svmai-linux-amd64
+          - os: macos-latest
+            artifact_name: svmai
+            asset_name: svmai-macos-amd64
+          - os: windows-latest
+            artifact_name: svmai.exe
+            asset_name: svmai-windows-amd64.exe
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Install dependencies (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev pkg-config build-essential
+      
+      - name: Build
+        run: cargo build --release
+      
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./target/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}
+          asset_content_type: application/octet-stream

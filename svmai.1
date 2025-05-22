@@ -1,0 +1,102 @@
+.TH SVMAI 1 "May 2025" "svmai 0.1.0" "User Commands"
+.SH NAME
+svmai \- Solana Wallet Management CLI Tool
+.SH SYNOPSIS
+.B svmai
+[\fIOPTIONS\fR]
+[\fICOMMAND\fR]
+.SH DESCRIPTION
+.B svmai
+is a command-line interface (CLI) tool for managing Solana wallets. It allows users to find Solana wallet files, securely store their private keys using system keychain encryption, manage multiple wallets, view balances, and perform batch operations and token mixing for enhanced privacy.
+.SH OPTIONS
+.TP
+.BR \-c ", " \-\-config =\fIFILE\fR
+Sets a custom config file
+.TP
+.BR \-v ", " \-\-verbose
+Increases the level of verbosity (can be used multiple times)
+.TP
+.BR \-h ", " \-\-help
+Displays help information
+.TP
+.BR \-V ", " \-\-version
+Displays version information
+.SH COMMANDS
+.TP
+.B search \fIDIRECTORY\fR [\fIOPTIONS\fR]
+Search for Solana wallet files in the specified directory
+.RS
+.TP
+.BR \-d ", " \-\-depth =\fIDEPTH\fR
+Maximum directory depth to search
+.TP
+.BR \-m ", " \-\-max-files =\fICOUNT\fR
+Maximum number of files to find
+.RE
+.TP
+.B add \fIFILE\fR [\fIOPTIONS\fR]
+Add a wallet to secure storage
+.RS
+.TP
+.BR \-n ", " \-\-name =\fINAME\fR
+Custom name for the wallet
+.RE
+.TP
+.B list
+List all stored wallets
+.TP
+.B remove \fINAME\fR
+Remove a wallet from secure storage
+.TP
+.B vanity [\fIOPTIONS\fR]
+Generate a vanity wallet with 'ai' prefix
+.RS
+.TP
+.BR \-n ", " \-\-name =\fINAME\fR
+Custom name for the wallet (default: ai_wallet)
+.TP
+.BR \-t ", " \-\-timeout =\fISECONDS\fR
+Timeout in seconds (default: 120)
+.RE
+.TP
+.B tui
+Launch the Text User Interface (default if no command is specified)
+.SH EXAMPLES
+.TP
+Search for wallet files in a directory:
+.B svmai search /home/user/documents -d 3 -m 50
+.TP
+Add a wallet file to secure storage:
+.B svmai add /path/to/wallet.json -n my_wallet
+.TP
+List all stored wallets:
+.B svmai list
+.TP
+Remove a wallet from secure storage:
+.B svmai remove my_wallet
+.TP
+Generate a vanity wallet with 'ai' prefix:
+.B svmai vanity -n my_ai_wallet -t 300
+.TP
+Launch the TUI:
+.B svmai tui
+.SH FILES
+.TP
+.I ~/.config/svmai/config.toml
+Default configuration file location
+.TP
+.I ~/.local/share/svmai/
+Default data directory
+.SH SECURITY
+Private keys are encrypted using AES-GCM. The encryption key itself is managed by your operating system's keychain service. Accessing this key typically requires your user password or biometric authentication, providing a strong layer of security.
+.SH AUTHOR
+Written by the openSVM team.
+.SH REPORTING BUGS
+Report bugs to: <https://github.com/openSVM/svmai-cli/issues>
+.SH COPYRIGHT
+Copyright \(co 2025 openSVM. License MIT: <https://opensource.org/licenses/MIT>
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH SEE ALSO
+Full documentation at: <https://github.com/openSVM/svmai-cli>
