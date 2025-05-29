@@ -19,7 +19,7 @@ hex = "0.4.3"     # For encoding/decoding master key if needed for storage/debug
 
 # TUI Libraries
 ratatui = { version = "0.27.0", features = ["all-widgets", "crossterm"] }
-crossterm = "0.27.0"
+crossterm = "0.29.0"
 num_cpus = "1.16.0"
 
 [dev-dependencies]
