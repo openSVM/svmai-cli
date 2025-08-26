@@ -9,7 +9,7 @@ jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -59,7 +59,7 @@ jobs:
             asset_name: svmai-windows-amd64.exe
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
