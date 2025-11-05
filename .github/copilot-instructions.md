@@ -30,7 +30,7 @@ src/
 └── transaction_handler.rs   # Batch send and token mixing logic (not currently integrated)
 ```
 
-Note: Some modules (`config.rs`, `logging.rs`, `transaction_handler.rs`) exist as files but are not yet imported in `main.rs`, indicating they may be planned features or incomplete integrations.
+Note: Some modules (`config.rs`, `logging.rs`, `transaction_handler.rs`) exist as implemented files but are not yet imported in `main.rs`, indicating they are planned features that have been developed but not yet integrated into the main application.
 
 ## Build Process
 
@@ -232,7 +232,7 @@ When modifying the TUI:
 
 ## Known Issues
 
-- **Compilation Error**: The project currently has a compilation error in `wallet_manager.rs` at line 162. The code uses `Keypair::from_bytes(&key_bytes)` which does not exist in solana-sdk 3.0.0. The available methods are:
+- **Compilation Error**: The project currently has a compilation error in `wallet_manager.rs` at line 162. The code uses `Keypair::from_bytes(&key_bytes)` which was available in earlier versions of solana-sdk but has been removed in version 3.0.0. The available methods in solana-sdk 3.0.0 are:
   - `Keypair::new()` - Creates a new random keypair
   - `Keypair::new_from_array([u8; 32])` - Creates from a 32-byte seed (not 64-byte keypair)
   - `Keypair::from_base58_string(&str)` - Creates from base58 string
