@@ -533,7 +533,7 @@ fn ui(frame: &mut Frame, app: &mut App) {
             Constraint::Min(0),    // Main content
             Constraint::Length(3), // Status bar
         ])
-        .split(frame.size());
+        .split(frame.area());
 
     // Render title with app version and current time
     let title = match app.current_view {
