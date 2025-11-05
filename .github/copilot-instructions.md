@@ -24,11 +24,13 @@ src/
 ├── key_validator.rs         # Solana private key validation
 ├── secure_storage.rs        # Keychain integration and encryption
 ├── wallet_manager.rs        # Wallet CRUD operations
-├── transaction_handler.rs   # Batch send and token mixing logic
 ├── vanity_wallet.rs         # Vanity address generation
-├── config.rs                # Configuration management
-└── logging.rs               # Logging utilities
+├── config.rs                # Configuration management (not currently integrated)
+├── logging.rs               # Logging utilities (not currently integrated)
+└── transaction_handler.rs   # Batch send and token mixing logic (not currently integrated)
 ```
+
+Note: Some modules (`config.rs`, `logging.rs`, `transaction_handler.rs`) exist as files but are not yet imported in `main.rs`, indicating they may be planned features or incomplete integrations.
 
 ## Build Process
 
@@ -230,8 +232,14 @@ When modifying the TUI:
 
 ## Known Issues
 
-- The project currently has a compilation error in `wallet_manager.rs` related to `Keypair::from_bytes` which has been deprecated in solana-sdk 3.0.0
-- The TUI uses a deprecated `frame.size()` method that should be replaced with `frame.area()`
+- **Compilation Error**: The project currently has a compilation error in `wallet_manager.rs` at line 162. The code uses `Keypair::from_bytes(&key_bytes)` which does not exist in solana-sdk 3.0.0. The available methods are:
+  - `Keypair::new()` - Creates a new random keypair
+  - `Keypair::new_from_array([u8; 32])` - Creates from a 32-byte seed (not 64-byte keypair)
+  - `Keypair::from_base58_string(&str)` - Creates from base58 string
+  
+  The keypair bytes need to be split: first 32 bytes are the secret key seed, which should be used with `new_from_array()`.
+
+- **Deprecation Warning**: The TUI uses `frame.size()` at line 539 in `src/tui.rs`. While this currently works, ratatui has marked it as deprecated in favor of `frame.area()`. This is a minor issue that only generates a warning.
 
 When addressing issues:
 - Check if they're already known and documented
