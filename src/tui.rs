@@ -556,7 +556,7 @@ fn ui(frame: &mut Frame, app: &mut App) {
     
     let title_text = Line::from(vec![
         Span::styled("svmai ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-        Span::styled("v1.0.0 ", Style::default().fg(Color::Gray)),
+        Span::styled("v0.1.0 ", Style::default().fg(Color::Gray)),
         Span::styled("| ", Style::default().fg(Color::DarkGray)),
         Span::styled(title, Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
         Span::styled(" | ", Style::default().fg(Color::DarkGray)),
