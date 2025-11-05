@@ -232,7 +232,12 @@ When modifying the TUI:
 
 ## Known Issues
 
-- **Compilation Error**: The project currently has a compilation error in `wallet_manager.rs` at line 162. The code uses `Keypair::from_bytes(&key_bytes)` which was available in earlier versions of solana-sdk but has been removed in version 3.0.0. The available methods in solana-sdk 3.0.0 are:
+- **Compilation Error**: The project currently has compilation errors due to the use of `Keypair::from_bytes(&key_bytes)` which was available in earlier versions of solana-sdk but has been removed in version 3.0.0. This affects three files:
+  - `key_validator.rs` at line 37
+  - `tui.rs` at line 397
+  - `wallet_manager.rs` at line 162
+  
+  The available methods in solana-sdk 3.0.0 are:
   - `Keypair::new()` - Creates a new random keypair
   - `Keypair::new_from_array([u8; 32])` - Creates from a 32-byte seed (not 64-byte keypair)
   - `Keypair::from_base58_string(&str)` - Creates from base58 string
