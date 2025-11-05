@@ -4,6 +4,10 @@ use std::fs;
 use std::fs::File;
 use std::io;
 
+// Solana keypair constants
+const KEYPAIR_BYTES: usize = 64; // Full keypair: 32 bytes secret + 32 bytes public
+const SECRET_KEY_BYTES: usize = 32; // Just the secret key portion
+
 /// Validates if the content of a given JSON file represents a Solana private key.
 /// A Solana private key is typically represented as a JSON array of 64 u8 values.
 pub fn is_solana_wallet_json_file(file_path: &str) -> io::Result<bool> {
@@ -15,8 +19,8 @@ pub fn is_solana_wallet_json_file(file_path: &str) -> io::Result<bool> {
     match parsed_json {
         Ok(Value::Array(arr)) => {
             // Check if the array contains 64 numbers (u8 values for a private key)
-            if arr.len() == 64 {
-                let mut key_bytes: Vec<u8> = Vec::with_capacity(64);
+            if arr.len() == KEYPAIR_BYTES {
+                let mut key_bytes: Vec<u8> = Vec::with_capacity(KEYPAIR_BYTES);
                 for val in arr {
                     if let Value::Number(num) = val {
                         if let Some(byte_val) = num.as_u64() {
@@ -35,8 +39,8 @@ pub fn is_solana_wallet_json_file(file_path: &str) -> io::Result<bool> {
                 // If we successfully collected 64 bytes, try to create a Keypair from it.
                 // This is the definitive check for a valid Solana secret key.
                 // new_from_array expects only the 32-byte secret key
-                let mut secret_key = [0u8; 32];
-                secret_key.copy_from_slice(&key_bytes[0..32]);
+                let mut secret_key = [0u8; SECRET_KEY_BYTES];
+                secret_key.copy_from_slice(&key_bytes[0..SECRET_KEY_BYTES]);
                 let _keypair = Keypair::new_from_array(secret_key);
                 // Successfully created a keypair, this is a valid Solana secret key
                 Ok(true)

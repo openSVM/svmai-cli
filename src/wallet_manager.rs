@@ -6,6 +6,10 @@ use std::fs;
 use std::io::{self, Error, ErrorKind};
 use std::path::Path; // To validate a key from a file before adding
 
+// Solana keypair constants
+const KEYPAIR_BYTES: usize = 64; // Full keypair: 32 bytes secret + 32 bytes public
+const SECRET_KEY_BYTES: usize = 32; // Just the secret key portion
+
 /// Adds a new wallet by reading a private key from a JSON file and storing it securely.
 /// The wallet will be stored under the given `wallet_name`.
 pub fn add_wallet_from_file(wallet_name: &str, key_file_path: &str) -> io::Result<()> {
@@ -162,14 +166,14 @@ pub fn get_wallet_keypair(
         Some(key_bytes) => {
             // new_from_array expects only the 32-byte secret key, not the full 64-byte keypair
             // Convert Vec<u8> to [u8; 32] array
-            if key_bytes.len() != 64 {
+            if key_bytes.len() != KEYPAIR_BYTES {
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidData,
-                    format!("Invalid key length: expected 64 bytes, got {}", key_bytes.len())
+                    format!("Invalid key length: expected {} bytes, got {}", KEYPAIR_BYTES, key_bytes.len())
                 ));
             }
-            let mut secret_key = [0u8; 32];
-            secret_key.copy_from_slice(&key_bytes[0..32]);
+            let mut secret_key = [0u8; SECRET_KEY_BYTES];
+            secret_key.copy_from_slice(&key_bytes[0..SECRET_KEY_BYTES]);
             let keypair = solana_sdk::signer::keypair::Keypair::new_from_array(secret_key);
             Ok(Some(keypair))
         }

@@ -24,6 +24,9 @@ use crate::secure_storage;
 use crate::wallet_manager; // To interact with wallet data
 use crate::vanity_wallet::{self, VanityConfig, VanityStatus}; // For vanity wallet creation
 
+// Solana keypair constants
+const SECRET_KEY_BYTES: usize = 32; // Just the secret key portion
+
 // Define different views for the TUI
 enum View {
     WalletList,
@@ -346,7 +349,6 @@ impl App {
         
         // Start vanity wallet generation in a separate thread
         let vanity_config = self.vanity_config.clone();
-        let _cancelled = Arc::clone(&self.vanity_cancelled);
         let result = Arc::clone(&self.vanity_result);
         
         let handle = thread::spawn(move || {
@@ -395,8 +397,8 @@ impl App {
                     
                     // Reconstruct the keypair from bytes
                     // new_from_array expects only the 32-byte secret key
-                    let mut secret_key = [0u8; 32];
-                    secret_key.copy_from_slice(&keypair_bytes[0..32]);
+                    let mut secret_key = [0u8; SECRET_KEY_BYTES];
+                    secret_key.copy_from_slice(&keypair_bytes[0..SECRET_KEY_BYTES]);
                     let keypair_copy = solana_sdk::signer::keypair::Keypair::new_from_array(secret_key);
                     self.save_vanity_wallet(&keypair_copy);
                 }
