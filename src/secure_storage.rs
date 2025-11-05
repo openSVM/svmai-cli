@@ -1,14 +1,14 @@
 // secure_storage.rs
 
 use aes_gcm::{
-    aead::{Aead, AeadCore, KeyInit, OsRng},
+    aead::{Aead, AeadCore, KeyInit},
     Aes256Gcm,
     Key, // Added Key here
     Nonce,
 };
 use hex;
 use keyring::Entry;
-use rand::RngCore; // For generating master key bytes if needed
+use rand::{RngCore, rngs::OsRng}; // For generating master key bytes and nonces
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;
@@ -16,7 +16,8 @@ use std::io::{self, Read, Write};
 use std::path::PathBuf;
 // --- Constants ---
 pub const KEYCHAIN_MASTER_KEY_ACCOUNT_NAME: &str = "svmai_master_encryption_key";
-pub const CONFIG_FILE_NAME: &str = ".svmai_wallets.json";
+pub const CONFIG_FILE_NAME: &str = "wallets.json";
+pub const CONFIG_DIR_NAME: &str = "svmai";
 const AES_KEY_SIZE: usize = 32; // 256 bits
 const NONCE_SIZE: usize = 12; // 96 bits
 
@@ -224,14 +225,15 @@ pub fn get_config_path() -> Result<PathBuf, SecureStorageError> {
         return Ok(PathBuf::from(test_path));
     }
 
-    dirs::home_dir()
+    // Use ~/.config/svmai/ directory for storing wallet data
+    dirs::config_dir()
         .ok_or_else(|| {
             SecureStorageError::IoError(io::Error::new(
                 io::ErrorKind::NotFound,
-                "Home directory not found",
+                "Config directory not found",
             ))
         })
-        .map(|home| home.join(CONFIG_FILE_NAME))
+        .map(|config_dir| config_dir.join(CONFIG_DIR_NAME).join(CONFIG_FILE_NAME))
 }
 
 // --- Core Secure Storage Functions (Now with Encryption) ---

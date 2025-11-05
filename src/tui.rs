@@ -24,6 +24,9 @@ use crate::secure_storage;
 use crate::wallet_manager; // To interact with wallet data
 use crate::vanity_wallet::{self, VanityConfig, VanityStatus}; // For vanity wallet creation
 
+// Solana keypair constants
+const SECRET_KEY_BYTES: usize = 32; // Just the secret key portion
+
 // Define different views for the TUI
 enum View {
     WalletList,
@@ -228,7 +231,17 @@ impl App {
                 self.input_buffer.clear();
             },
             Err(e) => {
-                self.set_status(format!("Failed to add wallet: {}", e), StatusType::Error);
+                // Provide more helpful error message with suggestions
+                let error_msg = if e.to_string().contains("not found") || e.to_string().contains("No such file") {
+                    format!("Failed to add wallet: File not found. Please check the file path and try again. Error: {}", e)
+                } else if e.to_string().contains("permission") {
+                    format!("Failed to add wallet: Permission denied. Please check file permissions. Error: {}", e)
+                } else if e.to_string().contains("not a valid") || e.to_string().contains("Invalid") {
+                    format!("Failed to add wallet: Invalid wallet file format. Please ensure it's a valid Solana wallet JSON file. Error: {}", e)
+                } else {
+                    format!("Failed to add wallet: {}. Press 'h' for help or try a different file.", e)
+                };
+                self.set_status(error_msg, StatusType::Error);
             }
         }
     }
@@ -250,7 +263,14 @@ impl App {
                         }
                     },
                     Err(e) => {
-                        self.set_status(format!("Failed to remove wallet: {}", e), StatusType::Error);
+                        let error_msg = if e.to_string().contains("not found") {
+                            format!("Failed to remove wallet '{}': Wallet not found in storage. It may have been already removed.", wallet_name)
+                        } else if e.to_string().contains("permission") {
+                            format!("Failed to remove wallet '{}': Permission denied. Please check system permissions.", wallet_name)
+                        } else {
+                            format!("Failed to remove wallet '{}': {}. Please try again or restart the application.", wallet_name, e)
+                        };
+                        self.set_status(error_msg, StatusType::Error);
                     }
                 }
             }
@@ -346,7 +366,6 @@ impl App {
         
         // Start vanity wallet generation in a separate thread
         let vanity_config = self.vanity_config.clone();
-        let cancelled = Arc::clone(&self.vanity_cancelled);
         let result = Arc::clone(&self.vanity_result);
         
         let handle = thread::spawn(move || {
@@ -394,14 +413,11 @@ impl App {
                     drop(result_guard); // Release the lock before calling save_vanity_wallet
                     
                     // Reconstruct the keypair from bytes
-                    if let Ok(keypair_copy) = solana_sdk::signer::keypair::Keypair::from_bytes(&keypair_bytes) {
-                        self.save_vanity_wallet(&keypair_copy);
-                    } else {
-                        self.set_status(
-                            "Failed to process vanity wallet keypair".to_string(),
-                            StatusType::Error
-                        );
-                    }
+                    // new_from_array expects only the 32-byte secret key
+                    let mut secret_key = [0u8; SECRET_KEY_BYTES];
+                    secret_key.copy_from_slice(&keypair_bytes[0..SECRET_KEY_BYTES]);
+                    let keypair_copy = solana_sdk::signer::keypair::Keypair::new_from_array(secret_key);
+                    self.save_vanity_wallet(&keypair_copy);
                 }
                 true
             } else {
@@ -481,7 +497,19 @@ pub fn run_tui() -> io::Result<()> {
     let mut terminal = init_terminal()?;
     let mut app = App::new();
     app.load_wallets(); // Load initial wallet list
-    app.set_status("Welcome to svmai wallet manager".to_string(), StatusType::Info);
+    
+    // Enhanced welcome message based on wallet count
+    if app.wallets.is_empty() {
+        app.set_status(
+            "Welcome to svmai! No wallets found. Press 'a' to add a wallet or 'v' to create a vanity wallet. Press 'h' for help.".to_string(), 
+            StatusType::Info
+        );
+    } else {
+        app.set_status(
+            format!("Welcome to svmai wallet manager! {} wallet(s) loaded. Press 'h' for help.", app.wallets.len()), 
+            StatusType::Info
+        );
+    }
 
     loop {
         app.clear_status_if_expired();
@@ -536,7 +564,7 @@ fn ui(frame: &mut Frame, app: &mut App) {
             Constraint::Min(0),    // Main content
             Constraint::Length(3), // Status bar
         ])
-        .split(frame.size());
+        .split(frame.area());
 
     // Render title with app version and current time
     let title = match app.current_view {
@@ -557,7 +585,7 @@ fn ui(frame: &mut Frame, app: &mut App) {
     
     let title_text = Line::from(vec![
         Span::styled("svmai ", Style::default().fg(Color::Cyan).add_modifier(Modifier::BOLD)),
-        Span::styled("v1.0.0 ", Style::default().fg(Color::Gray)),
+        Span::styled("v0.1.0 ", Style::default().fg(Color::Gray)),
         Span::styled("| ", Style::default().fg(Color::DarkGray)),
         Span::styled(title, Style::default().fg(Color::White).add_modifier(Modifier::BOLD)),
         Span::styled(" | ", Style::default().fg(Color::DarkGray)),
