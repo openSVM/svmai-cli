@@ -1,14 +1,14 @@
 // secure_storage.rs
 
 use aes_gcm::{
-    aead::{Aead, AeadCore, KeyInit, OsRng},
+    aead::{Aead, AeadCore, KeyInit},
     Aes256Gcm,
     Key, // Added Key here
     Nonce,
 };
 use hex;
 use keyring::Entry;
-use rand::RngCore; // For generating master key bytes if needed
+use rand::{RngCore, rngs::OsRng}; // For generating master key bytes and nonces
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fs::File;

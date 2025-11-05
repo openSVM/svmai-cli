@@ -34,10 +34,12 @@ pub fn is_solana_wallet_json_file(file_path: &str) -> io::Result<bool> {
                 }
                 // If we successfully collected 64 bytes, try to create a Keypair from it.
                 // This is the definitive check for a valid Solana secret key.
-                match Keypair::from_bytes(&key_bytes) {
-                    Ok(_) => Ok(true),
-                    Err(_) => Ok(false), // Failed to create Keypair, not a valid Solana secret key
-                }
+                // new_from_array expects only the 32-byte secret key
+                let mut secret_key = [0u8; 32];
+                secret_key.copy_from_slice(&key_bytes[0..32]);
+                let _keypair = Keypair::new_from_array(secret_key);
+                // Successfully created a keypair, this is a valid Solana secret key
+                Ok(true)
             } else {
                 Ok(false) // Array length is not 64
             }

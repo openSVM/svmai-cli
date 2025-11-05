@@ -346,7 +346,7 @@ impl App {
         
         // Start vanity wallet generation in a separate thread
         let vanity_config = self.vanity_config.clone();
-        let cancelled = Arc::clone(&self.vanity_cancelled);
+        let _cancelled = Arc::clone(&self.vanity_cancelled);
         let result = Arc::clone(&self.vanity_result);
         
         let handle = thread::spawn(move || {
@@ -394,14 +394,11 @@ impl App {
                     drop(result_guard); // Release the lock before calling save_vanity_wallet
                     
                     // Reconstruct the keypair from bytes
-                    if let Ok(keypair_copy) = solana_sdk::signer::keypair::Keypair::from_bytes(&keypair_bytes) {
-                        self.save_vanity_wallet(&keypair_copy);
-                    } else {
-                        self.set_status(
-                            "Failed to process vanity wallet keypair".to_string(),
-                            StatusType::Error
-                        );
-                    }
+                    // new_from_array expects only the 32-byte secret key
+                    let mut secret_key = [0u8; 32];
+                    secret_key.copy_from_slice(&keypair_bytes[0..32]);
+                    let keypair_copy = solana_sdk::signer::keypair::Keypair::new_from_array(secret_key);
+                    self.save_vanity_wallet(&keypair_copy);
                 }
                 true
             } else {

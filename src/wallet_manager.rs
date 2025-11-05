@@ -159,16 +159,20 @@ pub fn get_wallet_keypair(
     match secure_storage::retrieve_private_key(wallet_name)
         .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?
     {
-        Some(key_bytes) => match solana_sdk::signer::keypair::Keypair::from_bytes(&key_bytes) {
-            Ok(keypair) => Ok(Some(keypair)),
-            Err(e) => Err(Error::new(
-                ErrorKind::InvalidData,
-                format!(
-                    "Failed to create keypair from stored bytes for wallet 	{}	: {}",
-                    wallet_name, e
-                ),
-            )),
-        },
+        Some(key_bytes) => {
+            // new_from_array expects only the 32-byte secret key, not the full 64-byte keypair
+            // Convert Vec<u8> to [u8; 32] array
+            if key_bytes.len() != 64 {
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("Invalid key length: expected 64 bytes, got {}", key_bytes.len())
+                ));
+            }
+            let mut secret_key = [0u8; 32];
+            secret_key.copy_from_slice(&key_bytes[0..32]);
+            let keypair = solana_sdk::signer::keypair::Keypair::new_from_array(secret_key);
+            Ok(Some(keypair))
+        }
         None => Ok(None),
     }
 }
