@@ -1,0 +1,74 @@
+name: Copilot Setup Steps
+
+# This workflow defines custom setup steps for GitHub Copilot coding agent
+# It ensures the agent has the necessary environment to build, test, and lint code
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev pkg-config build-essential
+      
+      - name: Setup Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+      
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
+      
+      - name: Cache cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-git-
+      
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-
+      
+      - name: Build the project
+        run: cargo build --verbose
+      
+      - name: Run tests
+        run: cargo test --verbose
+      
+      - name: Check code formatting
+        run: cargo fmt -- --check
+      
+      - name: Run clippy
+        run: cargo clippy -- -D warnings
+      
+      - name: Verify project structure
+        run: |
+          echo "✓ Project setup complete"
+          echo "✓ Dependencies installed"
+          echo "✓ Build successful"
+          echo "✓ Tests passed"
+          echo "✓ Code formatting verified"
+          echo "✓ Clippy checks passed"

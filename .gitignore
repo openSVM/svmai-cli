@@ -20,3 +20,10 @@ Thumbs.db
 # Test coverage
 *.profraw
 cobertura.xml
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test recordings
+*.gif
+*.mp4
