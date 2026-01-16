@@ -14,7 +14,7 @@ keyring = "3.0.2"
 walkdir = "2.5.0"
 dirs = "6.0.0" # For finding home directory
 aes-gcm = "0.10.3" # For AES-GCM encryption
-rand = "0.8"    # For generating nonces/IVs
+rand = "0.9"    # For generating nonces/IVs
 hex = "0.4.3"     # For encoding/decoding master key if needed for storage/debug
 
 # TUI Libraries
